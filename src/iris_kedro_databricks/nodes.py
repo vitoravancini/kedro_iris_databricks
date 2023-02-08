@@ -2,16 +2,18 @@
 This is a boilerplate pipeline
 generated using Kedro 0.18.4
 """
-
+import requests
 import logging
 from typing import Dict, Tuple
 
 import numpy as np
 import pandas as pd
 from pyspark.sql import DataFrame
+import io
+from pyspark.sql import SparkSession
 
 
-def split_data(data: DataFrame, parameters: Dict) -> Tuple:
+def split_data(parameters: Dict) -> Tuple:
     """Splits data into features and targets training and test sets.
 
     Args:
@@ -20,9 +22,14 @@ def split_data(data: DataFrame, parameters: Dict) -> Tuple:
     Returns:
         Split data.
     """
-
+    dataset = requests.get('https://gist.githubusercontent.com/netj/8836201/raw/6f9306ad21398ea43cba4f7d537619d0e07d5ae3/iris.csv').text
+    data = io.StringIO(dataset)
+    pd_df = pd.read_csv(data, sep=",")
+    df = SparkSession.builder.getOrCreate().createDataFrame(pd_df) \
+      .withColumnRenamed('variety', 'species')
+        
     # Split to training and testing data
-    data_train, data_test = data.randomSplit(
+    data_train, data_test = df.randomSplit(
         weights=[parameters["train_fraction"], 1 - parameters["train_fraction"]]
     )
 

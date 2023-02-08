@@ -13,7 +13,7 @@ def create_pipeline(**kwargs) -> Pipeline:
         [
             node(
                 func=split_data,
-                inputs=["example_iris_data", "parameters"],
+                inputs=["parameters"],
                 outputs=[
                     "X_train@pyspark",
                     "X_test@pyspark",
